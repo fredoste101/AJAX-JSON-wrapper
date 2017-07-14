@@ -47,30 +47,27 @@ function JSONRequest()
 
 	//Functions handlers
 
-	//Function that fires when connection is established
-	this.setOpenHandler = function(oh)
+	this.setOpenHandler = function(oh)	//Function that fires when connection is established
 	{
 		openHandler = oh;
 	}
 
-	//Function that fires when connection has received headers. Passed argument: associative array with http-headers
-	this.setHeaderHandler = function(hh)
+	this.setHeaderHandler = function(hh)	//Function that fires when connection has received headers. Passed argument: associative array with http-headers
 	{
 		headerHandler = hh;
 	}
 
-	//Functions that fires when data is being processed
-	this.setProcessingHandler = function(ph)
+	this.setProcessingHandler = function(ph)	//Functions that fires when data is being processed
 	{
 		processingHandler = ph;
 	}
-
-	//Function that fires when all data has been received. Passed arguement: the received JSON-object
-	this.setResponseHandler = function(rh)
+	
+	this.setResponseHandler = function(rh)	//Function that fires when all data has been received. Passed arguement: the received JSON-object
 	{
 		responseHandler = rh;
 	};
 
+	
 	//Execute
 
 	this.execute = function()
@@ -88,7 +85,7 @@ function JSONRequest()
 						fireHeaderHandler();	//Request received: status and headers available
 					break;
 					case 3:
-						fireProcessingHandler(); //Processing request (downloading): responseText holds partial data
+						fireProcessingHandler(); //Processing request (receiving data): responseText holds partial data
 					break;
 					case 4:
 						fireResponseHandler();	//The response has been received and the request is therefore finished.
