@@ -110,7 +110,7 @@ function JSONRequest()
 		{
 			request.setRequestHeader(name, requestHeaders[name]);
 		}
-		request.send();
+		request.send(encodeURIComponent());
 	};
 	
 
