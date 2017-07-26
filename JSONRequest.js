@@ -108,9 +108,9 @@ function JSONRequest()
 		request.setRequestHeader("Content-type", content);
 		for(name in requestHeaders)
 		{
-			request.setRequestHeader(name, requestHeaders[name]);
+			request.setRequestHeader(encodeURIComponent(name), encodeURIComponent(requestHeaders[name]));
 		}
-		request.send(encodeURIComponent());
+		request.send();
 	};
 	
 
