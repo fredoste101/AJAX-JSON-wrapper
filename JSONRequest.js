@@ -5,8 +5,8 @@ function JSONRequest()
 	var asyncrone = true;
 	var contentType = "application/x-www-form-urlencoded";
 	var openHandler, headerHandler, processingHandler, reponseHandler, errorHandler;
-	var requestHeaders = [];
 	var request = new XMLHttpRequest();
+	var postData;
 
 	//Setters/Configuration
 
@@ -34,10 +34,18 @@ function JSONRequest()
 	{
 		contentType = c;
 	}
-
-	this.addHeader = function(name, value)
+	
+	//Expect the FormData class!
+	this.setPostData = function(data)
 	{
-		requestHeaders[name] = value;
+		if(data instanceof FormData)
+		{
+			postData = data;	
+		}
+		else
+		{
+			throw "setPostData: data must be an instance of FormData.";	
+		}
 	}
 
 	this.abort = function()
@@ -105,12 +113,16 @@ function JSONRequest()
 		};
 		
 		request.open(method, url, asyncrone);
-		request.setRequestHeader("Content-type", content);
-		for(name in requestHeaders)
+		request.setRequestHeader("Content-type", contentType);
+		if(postData != null)
 		{
-			request.setRequestHeader(encodeURIComponent(name), encodeURIComponent(requestHeaders[name]));
+			request.send(postData);
 		}
-		request.send();
+		else
+		{
+			request.send();
+		}
+		
 	};
 	
 
