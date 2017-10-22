@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+
+<html>
+
+<head>
+
+	<meta charset='utf-8' />
+
+	<title>
+		Test for ajax-wrapper
+	</title>
+
+	<script src='ajax.js'></script>
+
+	<script>
+		//Testscript!
+		function testAjax()
+		{
+			var request = new JSONRequest();
+			
+			request.setURL("server.php");
+			request.setContentType("multipart/form-data");
+			
+			request.setErrorHandler(error);
+			request.setOpenHandler(requestOpen);
+			request.setHeaderHandler(responseHeaders);
+			request.setProcessingHandler(requestProcessing);
+			request.setResponseHandler(displayResponse);
+			request.setProgressHandler(progressDisplayer);
+
+			
+			var requestData = new FormData(document.getElementById('testForm'));
+			
+			try
+			{
+				request.setPostData(requestData);
+			}
+			catch(e)
+			{
+				alert("Wrong when setting requestData!");
+			}
+			
+			request.execute();
+		}
+	
+
+		function error(msg)
+		{
+			alert(msg);
+		}
+
+		function requestOpen()
+		{
+			alert("Request begin!");
+		}
+
+		function responseHeaders(headers)
+		{
+			var headerString = "\n";
+			for(index in headers)
+			{
+				headerString += index + " : " + headers[index] + " \n";
+			}
+			alert("Headers received: " + headerString);
+		}
+
+		function printArr(item, index)
+		{
+			return index + ":" + item;
+		}
+
+		function requestProcessing()
+		{
+			alert("The request is processing");
+		}
+
+		function displayResponse(response)
+		{
+			//document.getElementById('test').innerHTML = response.message;
+		}
+
+
+		function progressDisplayer(loaded, total)
+		{
+			var progressBar = document.getElementById('pbar');
+			if(total==0)
+			{
+				alert("The total is 0!!!");
+				//Do nothing
+			}
+			else
+			{
+				progressBar.max = total;
+				progressBar.value = loaded;
+			}
+		}
+		
+	</script>
+	
+</head>
+
+
+<body>
+
+	<form id='testForm' action='json_response.php' method='post' content='multipart/form-data'>
+		<input name='test' type='text' />
+		<input name='file' type='file' />
+		<input type="button" value='test ajax' onclick='testAjax()' />
+	</form>
+
+	<div id='test'>
+		This is where response will be!
+	</div>
+
+	 <progress id='pbar' value="0" max="100"></progress> 
+
+</body>
+
+</html>
