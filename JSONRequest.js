@@ -1,12 +1,16 @@
+//Class for requesting
+
 function JSONRequest()
 {
-	var method = "POST";
-	var url;
-	var asyncrone = true;
-	var contentType = "application/x-www-form-urlencoded";
-	var openHandler, headerHandler, processingHandler, reponseHandler, errorHandler;
-	var request = new XMLHttpRequest();
-	var postData;
+	var method = "POST";																//The method of the request. post by defualt.
+	var url;																			//The url to which the request will be done
+	var asyncrone = true;																//Asyncrone request is by default true.
+	var contentType = "application/x-www-form-urlencoded";					//Content type. Default value is default for regular form.
+	var openHandler, headerHandler, processingHandler, reponseHandler, errorHandler;	//Functions for handling stages of request-response
+	var abortHandler, timeoutHandler, progressHandler;
+	var request = new XMLHttpRequest();													//The xmlhttprequest that is wrapped by this.
+	var postData;																		//FormData object with data send in request.
+	var timeout = 0;																	//Time the request has to finish, before aborted. Given in millisecons. Default is no timeout.
 
 	//Setters/Configuration
 
@@ -55,12 +59,12 @@ function JSONRequest()
 
 	//Functions handlers
 
-	this.setOpenHandler = function(oh)	//Function that fires when connection is established
+	this.setOpenHandler = function(oh)	//Function that fires when connection is established. NO ARGUMENTS.
 	{
 		openHandler = oh;
 	}
 
-	this.setHeaderHandler = function(hh)	//Function that fires when connection has received headers. Passed argument: associative array with http-headers
+	this.setHeaderHandler = function(hh)	//Function that fires when connection has received headers. PASSED ARGUMENT: associative array with response http-headers
 	{
 		headerHandler = hh;
 	}
@@ -75,56 +79,90 @@ function JSONRequest()
 		responseHandler = rh;
 	};
 
-	
+	this.setAbortHandler = function(ah)	//Functions that fires when request is aborted
+	{
+		abortHandler = ah;
+	}
+
+	this.setProgressHandler = function(ph)
+	{
+		progressHandler = ph;
+	}
+
+	this.setTimeout = function(t, th)
+	{
+		request.timeout = t;
+		timeoutHandler = th;
+	}
+	 
 	//Execute
 
 	this.execute = function()
 	{
-		request.onreadystatechange = function()
-		{
-			try
-			{
-				switch(this.readyState)
-				{
-					case 1:
-						fireOpenHandler();	//Server connection established: open() has been called
-					break;
-					case 2:
-						fireHeaderHandler();	//Request received: status and headers available
-					break;
-					case 3:
-						fireProcessingHandler(); //Processing request (receiving data): responseText holds partial data
-					break;
-					case 4:
-						fireResponseHandler();	//The response has been received and the request is therefore finished.
-					break;
-					default:
-						throw "ERROR: Unknown readystate in request";
-					break;
-				}
-			}
-			catch(e)
-			{
-				if(isHandlerSet(errorHandler))
-				{
-					errorHandler(e);
-				}
-			}
-		};
-		
 		request.open(method, url, asyncrone);
-		request.setRequestHeader("Content-type", contentType);
+		
+		
 		if(postData != null)
 		{
 			request.send(postData);
 		}
 		else
 		{
+			request.setRequestHeader("Content-type", contentType);
 			request.send();
 		}
-		
 	};
 	
+
+	//Events
+
+	request.onreadystatechange = function()
+	{
+		try
+		{
+			switch(this.readyState)
+			{
+				case 1:
+					fireOpenHandler();	//Server connection established: open() has been called
+				break;
+				case 2:
+					fireHeaderHandler();	//Request received: status and headers available
+				break;
+				case 3:
+					fireProcessingHandler(); //Processing request (receiving data): responseText holds partial data
+				break;
+				case 4:
+					fireResponseHandler();	//The response has been received and the request is therefore finished.
+				break;
+				default:
+					throw "ERROR: Unknown readystate in request";
+				break;
+			}
+		}
+		catch(e)
+		{
+			if(isHandlerSet(errorHandler))
+			{
+				errorHandler(e);
+			}
+		}
+	};
+
+	request.onabort = function()
+	{
+		fireAbortHandler();
+	}
+
+	request.upload.onprogress = function(event)	//NOTE THAT THIS IS ONLY FOR UPLOAD
+	{
+		fireProgressHandler(event);	
+	}
+
+	request.ontimeout = function()
+	{
+		fireTimeoutHandler();
+	}
+
 
 	//Private helper functions.
 
@@ -168,9 +206,33 @@ function JSONRequest()
 		}
 	}
 
+	function fireAbortHandler()
+	{
+		if(isHandlerSet(abortHandler))
+		{
+			abortHandler();
+		}
+	}
+
+	function fireProgressHandler(progress)
+	{
+		if(isHandlerSet(progressHandler))
+		{
+			progressHandler(progress.loaded, progress.total);
+		}
+	}
+
+	function fireTimeoutHandler()
+	{
+		if(isHandlerSet(timeoutHandler))
+		{
+			timeoutHandler();
+		}
+	}
+
 	function isHandlerSet(handler)
 	{
-		return typeof openHandler == "function";
+		return typeof handler == "function";
 	}
 
 	function isHttpStatusOk()
@@ -209,3 +271,10 @@ function JSONRequest()
 	}
 
 }
+
+
+
+
+
+
+
